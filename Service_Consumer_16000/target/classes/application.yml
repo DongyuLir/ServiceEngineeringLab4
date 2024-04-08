@@ -1,0 +1,34 @@
+server:
+  port: 16000
+spring:
+  application:
+    name: 'consumer-server'
+eureka: #这里都是发给服务注册中心看的
+  instance:
+    prefer-ip-address: true
+    instance-id: "${spring.cloud.client.ip-address}:${server.port}"
+    lease-renewal-interval-in-seconds: 5 #5秒时间，互动一次，sayHi
+    lease-expiration-duration-in-seconds: 15 #
+  client:
+    service-url: #因为eureka是集群，所以 ， 连接
+      defaultZone: "http://eurekaServer18000:18000/eureka/,http://eurekaServer18001:18001/eureka/"
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        wait-duration-in-open-state: 5000 #毫秒为单位 是10s
+        failure-rate-threshold: 10 #熔断器打开的失败阈值
+        event-consumer-buffer-size: 5 #事件缓冲区大小 设置缓冲区个数
+        automatic-transition-from-open-to-half-open-enabled: true #默认就是true,，是否自动从打开到半开
+        record-exceptions: java.lang.Exception  #记录的异常  ignore-exception-predicate: 这个是忽略异常
+        register-health-indicator: false #健康监测，如果我手动关闭某一个provider，这里的健康检测就会检测到，就会打开熔断
+        minimum-number-of-calls: 1 #触发熔断机制的最小请求个数
+        permitted-number-of-calls-in-half-open-state: 2 #半开的时候，允许通过的请求个数
+    #这个实例是用来接受反馈的
+    instances:
+      backendA:
+        base-config: default  #这个default指的是上面我们定义的default
+      backendB:
+        base-config: default
+        wait-duration-in-open-state: 3000 #会覆盖到之前的 10s
+        failure-rate-threshold: 15
