@@ -12,6 +12,7 @@
         <module name="Service_Provider_11000" />
         <module name="Eureka_Server_18000" />
         <module name="Eureka_Server_18001" />
+        <module name="Gateway_Server_12000" />
       </profile>
     </annotationProcessing>
   </component>
